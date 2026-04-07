@@ -8,8 +8,19 @@ from langchain.chat_models import init_chat_model
 from langchain.tools import tool, ToolRuntime
 from langgraph.checkpoint.memory import InMemorySaver
 
-# Load environment variables from .env file
-load_dotenv(find_dotenv(), override=True)
+# Load environment variables from .env (or fallback repo-root .env_)
+dotenv_path = find_dotenv()
+if not dotenv_path:
+    repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+    dotenv_path = os.path.join(repo_root, ".env_")
+load_dotenv(dotenv_path, override=True)
+
+api_key = os.getenv("OPENAI_API_KEY") or ""
+if (not api_key) or ("..." in api_key) or (api_key.strip().lower().startswith("sk-") and len(api_key.strip()) < 30):
+    raise SystemExit(
+        "OPENAI_API_KEY is missing or looks like a placeholder.\n"
+        "Update it in the env file ('.env' or '.env_') and re-run."
+    )
 
 
 # System prompt for the weather forecaster agent
@@ -43,7 +54,7 @@ model = init_chat_model(
     timeout=10,
     max_tokens=1000,
     max_retries=3,
-    api_key=os.getenv("OPENAI_API_KEY"),
+    api_key=api_key,
     base_url=os.getenv("OPENAI_API_BASE"),
     organization=os.getenv("OPENAI_ORG_ID"),
     top_p=1,
