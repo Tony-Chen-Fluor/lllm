@@ -57,7 +57,7 @@ model = init_chat_model(
     api_key=api_key,
     base_url=os.getenv("OPENAI_API_BASE"),
     organization=os.getenv("OPENAI_ORG_ID"),
-    top_p=1,
+    top_p=1,  ## ⬅️ OpenAI Chat Completions does not support top_k; omit it to avoid parse() errors.
     frequency_penalty=0,
     presence_penalty=0,
 )
